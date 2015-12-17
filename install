@@ -1,1 +1,1 @@
-cd ./files/build && cmake ../ && make
+mkdir ./files/build && cd ./files/build && cmake ../ && make

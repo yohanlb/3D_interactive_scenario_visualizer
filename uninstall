@@ -1,1 +1,1 @@
-cd ./files/build/ && rm -rf *
+cd ./files/build/ && rm -rf * && cd .. && rm -r build/
