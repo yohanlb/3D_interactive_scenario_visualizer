@@ -31,7 +31,8 @@
                 ss << specularNr++; // Transfer GLuint to stream
             number = ss.str(); 
             // Now set the sampler to the correct texture unit
-            glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+            // added "material because multiple_lights.fs use a "material" struct"
+            glUniform1i(glGetUniformLocation(shader.Program, ("material." + name + number).c_str()), i);
             // And finally bind the texture
             glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
         }

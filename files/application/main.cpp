@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 
     // Initialize SDL and open a window
-    glimac::SDLWindowManager windowManager(screenWidth, screenHeight, "GLImac");
+    glimac::SDLWindowManager windowManager(screenWidth, screenHeight, "3D SIV");
 
     // Initialize glew for OpenGL3+ support
     GLenum glewInitError = glewInit();
@@ -43,10 +43,12 @@ int main(int argc, char** argv) {
 
 
     // Setup and compile our shaders
-    Shader shader("shaders/shader.vs", "shaders/shader.frag");
+    Shader objectsShader("shaders/multiple_lights.vs", "shaders/multiple_lights.fs");
+    Shader lampObjectsShader("shaders/lamp.vs", "shaders/lamp.fs");
 
     // Load models
     Model ourModel("../../assets/models/stormtrooper/Stormtrooper.obj");
+    Model lampModel("../../assets/models/moon/moon.obj");
     //Model ourModel("../../assets/models/nanosuit/nanosuit.obj");
     //Model ourModel("../../assets/models/bla.obj");
 
@@ -60,6 +62,12 @@ int main(int argc, char** argv) {
     float mouseEpsilon = 0.01;
     bool firstMouse = true;
 
+
+    // Point light positions
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(5.0f, 0.0f, 10.0f),
+        glm::vec3(0.0f, 40.0f, 0.0f)
+    };
 
 
     // Application loop:
@@ -115,44 +123,60 @@ int main(int argc, char** argv) {
         if (mousePos.x < screenWidth - screenWidth*0.9)
             xoffset -= 1;
 
-
-
         mouseOldPos.x = mousePos.x;
         mouseOldPos.y = mousePos.y;
-
         camera.ProcessMouseMovement(xoffset, -yoffset);
 
 
 
 
+
         // Clear the colorbuffer
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClearColor(0.00f, 0.00f, 0.00f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.Use(); 
-
+        objectsShader.Use(); 
         // Transformation matrices
         glm::mat4 projection = glm::perspective(camera.Zoom, (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+
+        // Set the lighting uniforms
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+        // Point light 1
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);     
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[0].ambient"), 0.09f, 0.09f, 0.09f);       
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f); 
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[0].constant"), 1.0f);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[0].linear"), 0.109);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[0].quadratic"), 0.0032);      
+        // Point light 2
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);     
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);       
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[1].diffuse"), 1.0f, 1.0f, 1.0f); 
+        glUniform3f(glGetUniformLocation(objectsShader.Program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[1].constant"), 1.0f);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[1].linear"), 0.009);
+        glUniform1f(glGetUniformLocation(objectsShader.Program, "pointLights[1].quadratic"), 0.0032);      
+
 
         // Draw the loaded model
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(20.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
         //model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f)); // It's a bit too big for our scene, so scale it down
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        
-        ourModel.Draw(shader);       
-
-
+        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        ourModel.Draw(objectsShader);       
                 // Je dessine d'autre models pour faire des tests de caméra
+        
                     int i;
                     for (i = 0; i < 10; ++i)
                     {         
                         model = glm::translate(model, glm::vec3(-10.0f, 0.0f,  0.0f));
-                        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-                        ourModel.Draw(shader);       
+                        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+                        ourModel.Draw(objectsShader);       
                     }   
                 
 
@@ -160,16 +184,16 @@ int main(int argc, char** argv) {
                     for (i = 0; i < 10; ++i)
                     {         
                         model = glm::translate(model, glm::vec3(+10.0f, 0.0f,  0.0f));
-                        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-                        ourModel.Draw(shader);       
+                        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+                        ourModel.Draw(objectsShader);       
                     }   
 
                     model = glm::translate(model, glm::vec3(+10.0f, 0.0f,  -5.0f));
                     for (i = 0; i < 10; ++i)
                     {         
                         model = glm::translate(model, glm::vec3(-10.0f, 0.0f,  0.0f));
-                        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-                        ourModel.Draw(shader);       
+                        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+                        ourModel.Draw(objectsShader);       
                     }   
                 
 
@@ -177,12 +201,27 @@ int main(int argc, char** argv) {
                     for (i = 0; i < 10; ++i)
                     {         
                         model = glm::translate(model, glm::vec3(+10.0f, 0.0f,  0.0f));
-                        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-                        ourModel.Draw(shader);       
-                    }  
+                        glUniformMatrix4fv(glGetUniformLocation(objectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+                        ourModel.Draw(objectsShader);       
+                    }
+        
                 //**************************************************************************** 
 
 
+        // Draw the lamps
+        lampObjectsShader.Use();
+        glUniformMatrix4fv(glGetUniformLocation(lampObjectsShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(lampObjectsShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        for(GLuint i = 0; i < 2; i++)
+        {
+            model = glm::mat4();
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f)); // Downscale lamp object (a bit too large)
+            glUniformMatrix4fv(glGetUniformLocation(lampObjectsShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            lampModel.Draw(lampObjectsShader);
+        }
+        // Move the light
+        pointLightPositions[0] += glm::vec3(0.0f, 0.0f, -0.005f);
 
 
 
