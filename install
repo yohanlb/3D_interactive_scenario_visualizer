@@ -1,1 +1,1 @@
-mkdir ./files/build/ && mkdir ./files/application/shaders/ && cd ./files/build/ && cmake ../ && make
+mkdir -p ./files/build/ && mkdir -p ./files/application/shaders/ && cd ./files/build/ && cmake ../ && make

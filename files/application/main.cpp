@@ -1,43 +1,42 @@
-#include <glimac/SDLWindowManager.hpp>
-#include <GL/glew.h>
-#include <iostream>
+#include "includes.hpp"
 
-int main(int argc, char** argv) {
-    // Initialize SDL and open a window
-    glimac::SDLWindowManager windowManager(800, 600, "GLImac");
+int main() {
+    GLuint windowWidth = 1066, windowHeight = 600;
+
+    // Initialize SDL
+    if(0 != SDL_Init(SDL_INIT_VIDEO)) {
+        std::cerr << SDL_GetError() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Enable multisampling
+    if(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1) == -1) std::cerr << SDL_GetError() << std::endl;
+    else if(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 6) == -1) std::cerr << SDL_GetError() << std::endl;
+
+	// Open a window
+    if(!SDL_SetVideoMode(windowWidth, windowHeight, 32, SDL_OPENGL)) {
+        std::cerr << SDL_GetError() << std::endl;
+        return EXIT_FAILURE;
+    }
+    SDL_WM_SetCaption("3D Interactive Scenario Visualizer", nullptr);
 
     // Initialize glew for OpenGL3+ support
+    glewExperimental = GL_TRUE;
     GLenum glewInitError = glewInit();
     if(GLEW_OK != glewInitError) {
         std::cerr << glewGetErrorString(glewInitError) << std::endl;
         return EXIT_FAILURE;
     }
+    glViewport(0, 0, windowWidth, windowHeight);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    
+    // Here lives the program
+	engine::Application application(windowWidth, windowHeight);	
+	application.run();
 
-    std::cout << "OpenGL Version : " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLEW Version : " << glewGetString(GLEW_VERSION) << std::endl;
-
-    /*********************************
-     * HERE SHOULD COME THE INITIALIZATION CODE
-     *********************************/
-
-    // Application loop:
-    bool done = false;
-    while(!done) {
-        // Event loop:
-        SDL_Event e;
-        while(windowManager.pollEvent(e)) {
-            if(e.type == SDL_QUIT) {
-                done = true; // Leave the loop after this iteration
-            }
-        }
-
-        /*********************************
-         * HERE SHOULD COME THE RENDERING CODE
-         *********************************/
-
-        // Update the display
-        windowManager.swapBuffers();
-    }
-
+    SDL_Quit();
     return EXIT_SUCCESS;
 }
