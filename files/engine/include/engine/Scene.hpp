@@ -13,8 +13,10 @@
 
 /* SDL, GL, glm */
 #include <GL/glew.h>
+#include <glm/gtx/vector_angle.hpp>
 
 /* other */
+#include <cmath>
 #include <string>
 #include <sstream>
 

@@ -14,7 +14,7 @@ namespace engine {
 			virtual ~MenuState();
 
             /* Other methods */
-            virtual const ApplicationState* enter(Game& game) const;
+            virtual const ApplicationState* enter(Game& game);
             virtual ApplicationState* loop(Game& game);
 
 		private:

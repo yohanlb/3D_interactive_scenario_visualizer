@@ -1,1 +1,1 @@
-rm -rf ./files/build/ && rm -rf ./files/application/shaders/
+rm -rf ./files/build/

@@ -1,5 +1,5 @@
 #include <engine/Camera.hpp>
-
+#include <iostream>
 namespace engine {
 	
 	/* Constructors & Destructor */
@@ -13,40 +13,21 @@ namespace engine {
 		m_worldUp(worldUp),
 		m_yaw(yaw),
 		m_pitch(pitch),
+		m_yawPin(0.0f),
+		m_pitchPin(0.0f),
 		m_windowWidth(windowWidth),
 		m_windowHeight(windowHeight),
 		m_zoom(zoom),
 		m_nearPlane(nearPlane),
 		m_farPlane(farPlane),
-		m_movementSpeed(movementSpeed),
+		m_in2DVehicle(false),
+		m_in3DVehicle(true),
+		m_movementSpeed(m_in3DVehicle ? movementSpeed / 20 : movementSpeed),
 		m_leftRightMove(0),
 		m_backwardForwardMove(0),
-		m_mouseSensitivity(mouseSensitivity),
-		m_mousePosition(m_windowWidth / 2, m_windowHeight / 2),
-		m_mouseOldPosition(m_mousePosition),
-		m_mouseOffset(0.0, 0.0) {
-		updateCameraVectors();
-	}
-
-	// Constructor with scalar values
-	Camera::Camera(const GLuint windowWidth, const GLuint windowHeight, const GLfloat nearPlane, const GLfloat farPlane, const GLfloat positionX, const GLfloat positionY, const GLfloat positionZ, const glm::vec3 front, const GLfloat worldUpX, const GLfloat worldUpY, const GLfloat worldUpZ, const GLfloat yaw, const GLfloat pitch, const GLfloat movementSpeed, const GLfloat mouseSensitivity, const GLfloat zoom):
-		m_position(glm::vec3(positionX, positionY, positionZ)),
-		m_frontLook(front),
-		m_frontMove(m_frontLook),
-		m_up(),
-		m_right(),
-		m_worldUp(glm::vec3(worldUpX, worldUpY, worldUpZ)),
-		m_yaw(yaw),
-		m_pitch(pitch),
-		m_windowWidth(windowWidth),
-		m_windowHeight(windowHeight),
-		m_zoom(zoom),
-		m_nearPlane(nearPlane),
-		m_farPlane(farPlane),
-		m_movementSpeed(movementSpeed),
-		m_leftRightMove(0),
-		m_backwardForwardMove(0),
-		m_mouseSensitivity(mouseSensitivity),
+		m_backwardForwardDirection(),
+		m_leftRightDirection(),
+		m_mouseSensitivity(m_in3DVehicle ? mouseSensitivity / 3 : mouseSensitivity),
 		m_mousePosition(m_windowWidth / 2, m_windowHeight / 2),
 		m_mouseOldPosition(m_mousePosition),
 		m_mouseOffset(0.0, 0.0) {
@@ -80,13 +61,45 @@ namespace engine {
 	void Camera::processMouseMovement() {
 		SDL_GetMouseState(&m_mousePosition.x, &m_mousePosition.y);
 		m_mouseOffset = m_mousePosition - m_mouseOldPosition;
-		m_mousePosition = glm::ivec2(m_windowWidth / 2, m_windowHeight / 2);
-        m_mouseOldPosition = m_mousePosition;
+		if(m_in3DVehicle) {
+			if(m_mousePosition.x < m_windowWidth / 4) {
+				m_mouseOffset.x -= 1;
+				m_yawPin = -M_PI / 16;
+			}
+			else if(m_mousePosition.x > m_windowWidth / 4 * 3) {
+				m_mouseOffset.x += 1;
+				m_yawPin = M_PI / 16;
+			}
+			else m_yawPin = (m_mousePosition.x / (GLfloat) m_windowWidth * M_PI - M_PI / 2) / 4;
+			if(m_mousePosition.y < m_windowHeight / 4) {
+				m_mouseOffset.y -= 1;
+				m_pitchPin = M_PI / 16;
+			}
+			else if(m_mousePosition.y > m_windowHeight / 4 * 3) {
+				m_mouseOffset.y += 1;
+				m_pitchPin = -M_PI / 16;
+			}
+			else m_pitchPin = (m_mousePosition.y / (GLfloat) m_windowHeight * M_PI - M_PI / 2) / (-4);
+		}
+		else m_mousePosition = glm::ivec2(m_windowWidth / 2, m_windowHeight / 2);
+		m_mouseOldPosition = m_mousePosition;
 	}
 	
 	// Update the position based on the keyboard-processed movement
 	void Camera::move(const GLfloat deltaTime) {
-		m_position += (m_frontMove * m_backwardForwardMove + m_right * m_leftRightMove) * m_movementSpeed * deltaTime;
+		if(m_in3DVehicle) {
+			m_backwardForwardDirection += m_frontLook * m_backwardForwardMove;
+			m_leftRightDirection += m_right * m_leftRightMove;
+
+			m_backwardForwardDirection -= m_backwardForwardDirection * DAMPING;
+			m_leftRightDirection -= m_leftRightDirection * DAMPING;
+			m_position += (m_backwardForwardDirection + m_leftRightDirection) * m_movementSpeed * deltaTime;
+			GLboolean goingBackward = glm::orientedAngle(glm::vec2(m_frontLook.x, m_frontLook.z), glm::vec2(m_backwardForwardDirection.x, m_backwardForwardDirection.z));
+			m_zoom = ZOOM + glm::l2Norm(goingBackward ? glm::vec3() : glm::vec3(fabs(m_backwardForwardDirection.x), fabs(m_backwardForwardDirection.y), fabs(m_backwardForwardDirection.z)) / 100.0f);
+		}
+		else {
+			m_position += (m_frontMove * m_backwardForwardMove + m_right * m_leftRightMove) * m_movementSpeed * deltaTime;
+		}
 	}
 	
 	// Update the directions based on the mouse-processed orientation
@@ -96,13 +109,19 @@ namespace engine {
 
 		// Make sure that when m_pitch is out of bounds, the screen doesn't get flipped
 		if(constrainPitch) {
-			if(m_pitch > 89.0f)	m_pitch = 89.0f;
-			else if(m_pitch < -89.0f) m_pitch = -89.0f;
+			if(m_in3DVehicle) {
+				if(m_pitch > 79.0f)	m_pitch = 79.0f;
+				else if(m_pitch < -79.0f) m_pitch = -79.0f;
+			}
+			else {
+				if(m_pitch > 89.0f)	m_pitch = 89.0f;
+				else if(m_pitch < -89.0f) m_pitch = -89.0f;
+			}
 		}
 
 		// Update m_front, m_right and m_up vectors using the updated Euler angles
 		updateCameraVectors();
-		SDL_WarpMouse(m_mousePosition.x, m_mousePosition.y);
+		if(!m_in3DVehicle) SDL_WarpMouse(m_mousePosition.x, m_mousePosition.y);
 	}
 
 	// Returns the view matrix calculated using Euler angles and the lookAt matrix

@@ -8,7 +8,7 @@ namespace engine {
 	MenuState::~MenuState() {}
 
 	/* Other methods */
-	const ApplicationState* MenuState::enter(Game& game) const {
+	const ApplicationState* MenuState::enter(Game& game) {
 		return this;
 	}
 	
@@ -64,12 +64,12 @@ namespace engine {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Display the overlay
-        game.m_overlays[0].renderText("MenuState", 10.0f, 80.0f, 1.0f, glm::vec3(0.5f, 1.0f, 1.0f));
-        game.m_overlays[0].renderText("Press TAB to switch between states", 10.0f, 45.0f, 0.5f, glm::vec3(0.5f, 1.0f, 1.0f));
-        game.m_overlays[0].renderText("Press ESC to quit the program", 10.0f, 15.0f, 0.5f, glm::vec3(0.5f, 1.0f, 1.0f));
+        game.m_overlays[0].renderText("Menu", 10.0f, 80.0f, 1.0f, glm::vec3(0.5f, 1.0f, 1.0f));
+        game.m_overlays[0].renderText("Jouer: TAB", 10.0f, 45.0f, 0.5f, glm::vec3(0.5f, 1.0f, 1.0f));
+        game.m_overlays[0].renderText("Quitter: ESC", 10.0f, 15.0f, 0.5f, glm::vec3(0.5f, 1.0f, 1.0f));
 		
 		// Hide the mouse cursor
-		SDL_ShowCursor(SDL_ENABLE);
+		//SDL_ShowCursor(SDL_ENABLE);
 
         // Update the display
         SDL_GL_SwapBuffers();

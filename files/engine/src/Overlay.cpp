@@ -3,17 +3,16 @@
 namespace engine {
 	
 	/* Constructors & Destructor */
-	Overlay::Overlay(const std::string faceName):
+	Overlay::Overlay(const std::string faceName, const GLuint windowWidth, const GLuint windowHeight):
 		m_ft(),
 		m_face(),
 		m_characters(),
-		m_projection(glm::ortho(0.0f, 1066.0f, 0.0f, 600.0f)),
+		m_projection(glm::ortho(0.0f, (GLfloat) windowWidth, 0.0f, (GLfloat) windowHeight)),
 		m_VAO(),
 		m_VBO(),
 		m_shader("font.vs", "font.fs") {
 		if(FT_Init_FreeType(&m_ft)) std::cout << "Error: FreeType: Could not init FreeType Library" << std::endl;
 		if(FT_New_Face(m_ft, (static_cast<std::ostringstream&> (std::ostringstream().seekp(0) << "../../assets/fonts/" << faceName << ".ttf").str()).c_str(), 0, &m_face)) std::cout << "Error: FreeType: Failed to load font" << std::endl;
-		//if (FT_New_Face(m_ft, "../../assets/fonts/Hack-v2_018-ttf/Hack-Regular.ttf", 0, &m_face)) std::cout << "Error: FreeType: Failed to load font" << std::endl;
 
 		FT_Set_Pixel_Sizes(m_face, 0, 48);
 

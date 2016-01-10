@@ -1,7 +1,7 @@
 #include "includes.hpp"
 
 int main() {
-    GLuint windowWidth = 1066, windowHeight = 600;
+    GLuint windowWidth = 1200, windowHeight = 675;
 
     // Initialize SDL
     if(0 != SDL_Init(SDL_INIT_VIDEO)) {

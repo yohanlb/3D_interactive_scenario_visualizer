@@ -8,7 +8,7 @@ namespace engine {
 	StopState::~StopState() {}
 
 	/* Other methods */
-	const ApplicationState* StopState::enter(Game& game) const {
+	const ApplicationState* StopState::enter(Game& game) {
 		return nullptr;
 	}
 	

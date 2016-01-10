@@ -29,7 +29,7 @@ namespace engine {
 	class Overlay {
 		public:
             /* Constructors & Destructor */
-			Overlay(const std::string faceName);
+			Overlay(const std::string faceName, const GLuint windowWidth, const GLuint windowHeight);
 			~Overlay();
 
 			/* Other methods */

@@ -20,7 +20,7 @@ namespace engine {
             virtual ~ApplicationState();
 
             /* Other methods */
-            virtual const ApplicationState* enter(Game& game) const = 0;
+            virtual const ApplicationState* enter(Game& game) = 0;
             virtual ApplicationState* loop(Game& game) = 0;
 
 		private:

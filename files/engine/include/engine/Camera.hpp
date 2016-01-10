@@ -6,11 +6,13 @@
 /* SDL, GL, glm */
 #include <SDL/SDL.h>
 #include <GL/glew.h>
+#include <glm/gtx/vector_angle.hpp>
 
 // Default camera values
 const GLfloat YAW = -90.0f;
 const GLfloat PITCH = 0.0f;
 const GLfloat SPEED = 0.01f;
+const GLfloat DAMPING = 0.01f;
 const GLfloat SENSITIVTY = 0.20f;
 const GLfloat ZOOM = 45.0f; // Visually interesting or extreme values : 46.0f~47.0f ; 44.25f
 
@@ -21,9 +23,8 @@ namespace engine {
 		public:
             /* Constructors & Destructor */
 			// Constructor with vectors
-			Camera(const GLuint windowWidth, const GLuint windowHeight, const GLfloat nearPlane = 0.1f, const GLfloat farPlane = 100.0f, const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), const GLfloat yaw = YAW, const GLfloat pitch = PITCH, const GLfloat movementSpeed = SPEED, const GLfloat mouseSensitivity = SENSITIVTY, const GLfloat zoom = ZOOM);
+			Camera(const GLuint windowWidth, const GLuint windowHeight, const GLfloat nearPlane = 0.1f, const GLfloat farPlane = 10000.0f, const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), const glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), const GLfloat yaw = YAW, const GLfloat pitch = PITCH, const GLfloat movementSpeed = SPEED, const GLfloat mouseSensitivity = SENSITIVTY, const GLfloat zoom = ZOOM);
 			// Constructor with scalar values
-			Camera(const GLuint windowWidth, const GLuint windowHeight, const GLfloat nearPlane, const GLfloat farPlane, const GLfloat positionX = 0.0f, const GLfloat positionY = 0.0f, const GLfloat positionZ = 0.0f, const glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), const GLfloat worldUpX = 0.0f, const GLfloat worldUpY = 1.0f, const GLfloat worldUpZ = 0.0f, const GLfloat yaw = YAW, const GLfloat pitch = PITCH, const GLfloat movementSpeed = SPEED, const GLfloat mouseSensitivity = SENSITIVTY, const GLfloat zoom = ZOOM);
 			~Camera();
 			
             /* Other methods */
@@ -49,6 +50,8 @@ namespace engine {
 			/* Euler angles */
 			GLfloat m_yaw;
 			GLfloat m_pitch;
+			GLfloat m_yawPin;
+			GLfloat m_pitchPin;
 
 			/* Camera options */
 			GLuint m_windowWidth;
@@ -56,11 +59,15 @@ namespace engine {
 			GLfloat m_zoom;
 			GLfloat m_nearPlane;
 			GLfloat m_farPlane;
+			GLboolean m_in2DVehicle;
+			GLboolean m_in3DVehicle;
 			
 			/* Keyboard-triggered camera movement properties */
 			GLfloat m_movementSpeed;
 			GLfloat m_leftRightMove;
 			GLfloat m_backwardForwardMove;
+			glm::vec3 m_backwardForwardDirection;
+			glm::vec3 m_leftRightDirection;
 
 			/* Mouse-driven camera movement properties */
 			GLfloat m_mouseSensitivity;

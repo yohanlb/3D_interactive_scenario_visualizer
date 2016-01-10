@@ -1,7 +1,7 @@
 #pragma once
 
-#define SHADERS_NUM 3
-#define OVERLAYS_NUM 2
+#define SHADERS_NUM 4
+#define OVERLAYS_NUM 1
 
 /* engine */
 #include <engine/Scene.hpp>
@@ -17,7 +17,7 @@ namespace engine {
 			Game(const GLuint windowWidth, const GLuint windowHeight);
 			~Game();
 
-			Scene m_scene;
+			Scene* m_scene;
 			Shader m_shaders[SHADERS_NUM];
 			Camera m_camera;
 			Overlay m_overlays[OVERLAYS_NUM];

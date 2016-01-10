@@ -6,6 +6,10 @@ struct Material {
     float shininess;
 };
 
+/* Note: because we now use a material struct again you want to change your
+mesh class to bind all the textures using material.texture_diffuseN instead of
+texture_diffuseN. */
+
 struct PointLight {
     vec3 position;
     
@@ -33,7 +37,8 @@ uniform Material material;
 // Function prototypes
 vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 fragPos, vec3 viewDir);
 
-void main() {    
+void main()
+{    
     vec3 result;
     vec3 viewDir = normalize(viewPos - fragPosition);
     vec3 norm = normalize(Normal);
@@ -46,7 +51,8 @@ void main() {
 
 
 // Calculates the color when using a point light.
-vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 fragPos, vec3 viewDir) {
+vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 fragPos, vec3 viewDir)
+{
     vec3 lightDir = normalize(light.position - fragPos);
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);

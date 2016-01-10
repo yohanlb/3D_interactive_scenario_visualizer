@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(3D_Interactive_Scenario_Visualizer)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Weffc++ -pedantic -std=c++11 -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
+#-Wall -Wextra -Weffc++ -pedantic
 add_definitions(-lassimp)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/third-party/CMake)
