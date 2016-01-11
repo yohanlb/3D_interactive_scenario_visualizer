@@ -1,7 +1,7 @@
 #pragma once
 
-#define OBJECTS_NUM 1
-#define LAMPS_NUM 1
+#define OBJECTS_NUM 2
+#define LAMPS_NUM 2
 #define POINT_LIGHTS_NUM 2
 
 /* engine */
@@ -25,11 +25,11 @@ namespace engine {
 	class Scene {
 		public:
             /* Constructors & Destructor */
-			Scene(const GLchar* skyboxName, const GLchar* model1Name, const GLchar* model2Name);
+			Scene(const GLchar* skyboxName, const GLchar* objectName,  const GLchar* objectName2, const GLchar* lampName);
 			~Scene();
 
 			/* Other methods */
-			void render(Camera& camera, const Shader* shaders) const;
+			void render(Camera& camera, const Shader* shaders);
 
 			Skybox m_skybox;
 			Model m_objects[OBJECTS_NUM];

@@ -3,16 +3,16 @@
 namespace engine {
 	
 	/* Constructors & Destructor */
-	Scene::Scene(const GLchar* skyboxName, const GLchar* objectName, const GLchar* lampName):
+	Scene::Scene(const GLchar* skyboxName, const GLchar* objectName,  const GLchar* objectName2, const GLchar* lampName):
 		m_skybox(skyboxName),
-		m_objects{Model(objectName)},
-		m_lamps{Model(lampName)},
-		m_pointLightPositions{glm::vec3(0.0f, 0.0f, -150.0f), glm::vec3(0.0f, 40.0f, 0.0f)} {}
+		m_objects{Model(objectName), Model(objectName2)},
+		m_lamps{Model(lampName), Model("moon/moon.obj")},
+		m_pointLightPositions{glm::vec3(200.0f, 200.0f, -200.0f), glm::vec3(100.0f, 05.0f, -50.0f)} {}
 
 	Scene::~Scene() {}
 
 	/* Other methods */
-	void Scene::render(Camera& camera, const Shader* shaders) const {
+	void Scene::render(Camera& camera, const Shader* shaders) {
 		// Draw the skybox first
 		m_skybox.render(camera, shaders[2]);
 
@@ -45,20 +45,47 @@ namespace engine {
 			glUniform1f(glGetUniformLocation(shaders[0].m_program, (static_cast<std::ostringstream&> (std::ostringstream().seekp(0) << "pointLights[" << i << "].quadratic").str()).c_str()), 0.0128);
 		}
 		glUniform3f(glGetUniformLocation(shaders[0].m_program, (static_cast<std::ostringstream&> (std::ostringstream().seekp(0) << "pointLights[" << 0 << "].ambient").str()).c_str()), 500.0f, 375.0f, 250.0f);
-		glUniform3f(glGetUniformLocation(shaders[0].m_program, (static_cast<std::ostringstream&> (std::ostringstream().seekp(0) << "pointLights[" << 1 << "].ambient").str()).c_str()), 0.0f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(shaders[0].m_program, (static_cast<std::ostringstream&> (std::ostringstream().seekp(0) << "pointLights[" << 1 << "].ambient").str()).c_str()), 400.0f, 300.0f, 250.0f);
 
 		// Render the loaded models
-		for(GLuint i = OBJECTS_NUM; i--;) m_objects[i].render(shaders[0]);
+		//for(GLuint i = OBJECTS_NUM; i--;) m_objects[i].render(shaders[0]);
+		m_objects[0].render(shaders[0]);
+
+		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
+		model = glm::translate(glm::mat4(), glm::vec3(0.0f, -200.0f, -200.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shaders[0].m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		m_objects[0].render(shaders[0]);
+
+		//std::cout << SDL_GetTicks() << std::endl;
+
+		for (int i = 0; i < 20; ++i)
+		{
+			for (int j = 0; j < 20; ++j)
+			{
+				model = glm::translate(glm::mat4(), glm::vec3(0.0f+5*i, -10.0f, -150.0f + 5*j));
+				glUniformMatrix4fv(glGetUniformLocation(shaders[0].m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				m_objects[1].render(shaders[0]);
+			}
+		}
 
 		shaders[1].use();
-
 		// Set the transformation uniforms
 		glUniformMatrix4fv(glGetUniformLocation(shaders[1].m_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(glGetUniformLocation(shaders[1].m_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		model = glm::translate(model, glm::vec3(-10.0f, 0.0f,  -5.0f));
 		for(GLuint i = LAMPS_NUM; i--;) {
-			model = glm::translate(glm::mat4(), m_pointLightPositions[i]);
-			model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // Downscale lamp object (a bit too large)
+			
+			if (i==0)
+			{
+				model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+			}
+			else{
+				model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+				m_pointLightPositions[1].x =  200* cos( (float)SDL_GetTicks()/2000 );
+				m_pointLightPositions[1].y =  50.0f;
+				m_pointLightPositions[1].z =  200* sin( (float)SDL_GetTicks()/2000 ) - 200 ;
+			}
+			model = glm::translate(glm::mat4(), m_pointLightPositions[i]);			
 			glUniformMatrix4fv(glGetUniformLocation(shaders[1].m_program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 			m_lamps[i].render(shaders[1]);
 		}

@@ -128,7 +128,11 @@ namespace engine {
 							break;
 						case SDLK_SPACE:
 							delete game.m_scene;
-							game.m_scene = new Scene("lake", "Stormtrooper/Stormtrooper.obj", "moon/moon.obj");
+							game.m_scene = new Scene("lake", "Stormtrooper/Stormtrooper.obj", "R2-D2/R2-D2.obj", "moon/moon.obj");
+							break;
+						case SDLK_BACKSPACE:
+							delete game.m_scene;
+							game.m_scene = new Scene("cosmic4", "Stormtrooper/Stormtrooper.obj", "R2-D2/R2-D2.obj", "moon/moon.obj");
 							break;
 						case SDLK_TAB:
 							return new MenuState();
